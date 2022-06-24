@@ -2,20 +2,31 @@ packer {
   required_plugins {
     docker = {
       version = ">= 0.0.7"
-      source = "github.com/hashicorp/docker"
+      source  = "github.com/hashicorp/docker"
     }
   }
 }
 
+variable "docker_image" {
+  type    = string
+  default = "ubuntu:xenial"
+}
+
 source "docker" "ubuntu" {
-  image  = "ubuntu:xenial"
+  image  = var.docker_image
+  commit = true
+}
+
+source "docker" "ubuntu-bionic" {
+  image  = "ubuntu:bionic"
   commit = true
 }
 
 build {
   name    = "learn-packer"
   sources = [
-    "source.docker.ubuntu"
+    "source.docker.ubuntu",
+    "source.docker.ubuntu-bionic",
   ]
 
   provisioner "shell" {
@@ -29,10 +40,6 @@ build {
   }
 
   provisioner "shell" {
-    inline = ["echo This provisioner runs last"]
+    inline = ["echo Running ${var.docker_image} Docker image."]
   }
-}
-variable "docker_image" {
-  type    = string
-  default = "ubuntu:xenial"
 }
